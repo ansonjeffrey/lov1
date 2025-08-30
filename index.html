@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Happy Birthday — A Surprise</title>
+
+  <!-- Tailwind CDN (quick) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Great+Vibes&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --accent-from:#ff5f7a;
+      --accent-to:#8b5cf6;
+    }
+
+    /* Neon / gradient text */
+    .hero-gradient {
+      background-image: linear-gradient(90deg, var(--accent-from), #ff9ab8 40%, var(--accent-to));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Balloons & decorative shapes */
+    .balloon {
+      position: absolute;
+      bottom: -20%;
+      opacity: 0.18;
+      filter: blur(.2px);
+      transform-origin: center;
+      animation: floatBalloon linear infinite;
+    }
+    @keyframes floatBalloon {
+      0% { transform: translateY(0) rotate(-6deg) }
+      50% { transform: translateY(-18vh) rotate(6deg) }
+      100% { transform: translateY(0) rotate(-6deg) }
+    }
+
+    /* Confetti pieces falling */
+    .confetti {
+      position: absolute;
+      width: 8px;
+      height: 12px;
+      will-change: transform, opacity;
+      transform-origin: center;
+      border-radius: 1px;
+      animation: confettiFall linear forwards;
+    }
+    @keyframes confettiFall {
+      0% { transform: translateY(-10vh) rotate(0) ; opacity: 1 }
+      100% { transform: translateY(110vh) rotate(600deg); opacity: 0 }
+    }
+
+    /* Floating hearts (continuous) */
+    .floating-heart {
+      position: absolute;
+      bottom: -10%;
+      animation: heartFloat linear infinite;
+      opacity: 0.9;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,0.12));
+    }
+    @keyframes heartFloat {
+      0% { transform: translateY(0) scale(0.9); opacity: 0 }
+      10% { opacity: 1 }
+      100% { transform: translateY(-120vh) scale(1.05); opacity: 0 }
+    }
+
+    /* Sliding carousel inner width set in JS */
+    .carousel-slides { display:flex; gap:1rem; will-change: transform; }
+
+    /* Handwritten name */
+    .handwritten { font-family: 'Great Vibes', cursive; font-size: 2.75rem; line-height: 1; }
+
+    /* Soft glass card */
+    .card {
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.6);
+    }
+
+    /* small helpers */
+    .no-select { user-select: none; -webkit-user-select:none; }
+  </style>
+</head>
+<body class="antialiased bg-gradient-to-b from-rose-50 via-pink-50 to-violet-50 min-h-screen text-slate-900">
+
+<!-- ========== CONFIG - edit these values ========== -->
+<script>
+  window.CONFIG = {
+    partnerName: "MathiVarshini",
+    yourName: "Anson",
+    missedMonths: 6,
+    photos: [
+      "img1.png",   // put your file name here
+      "im2.jpg",
+      "im3.jpg",
+      "im4.jpg",
+      "im5.jpg"    // another image
+    ],
+    youtubeId: "QMz51XKzlDY",
+  };
+</script>
+
+<!-- Page -->
+<div id="app" class="relative overflow-hidden">
+
+  <!-- decorative balloons (SVG) -->
+  <svg class="balloon left-8 top-8" width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg" style="animation-duration:10s;">
+    <ellipse cx="60" cy="60" rx="40" ry="50" fill="url(#g1)"/>
+    <defs>
+      <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#FFD6E0"/><stop offset="1" stop-color="#FF9AB8"/></linearGradient>
+    </defs>
+  </svg>
+
+  <svg class="balloon right-12 top-20" width="180" height="180" viewBox="0 0 200 200" style="animation-duration:12s;">
+    <ellipse cx="100" cy="40" rx="46" ry="56" fill="url(#g2)"/>
+    <defs>
+      <linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#EAD7FF"/><stop offset="1" stop-color="#C4B5FD"/></linearGradient>
+    </defs>
+  </svg>
+
+  <!-- floating hearts container -->
+  <div id="hearts" class="pointer-events-none"></div>
+
+  <!-- Hero -->
+  <main class="relative z-10 max-w-5xl mx-auto px-6 py-12">
+    <header class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-rose-400 flex items-center justify-center text-white shadow-lg">
+          <!-- heart icon -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.7l-1.06-1.09a5.5 5.5 0 1 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" fill="currentColor"/></svg>
+        </div>
+        <div>
+          <div class="text-sm text-slate-600">A surprise for</div>
+          <div id="hdrName" class="text-lg font-semibold">Her Name</div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button id="playBtn" class="px-3 py-2 rounded-full bg-white/90 shadow hover:scale-105 transition-transform">Play Song</button>
+        <button id="downloadBtn" class="px-3 py-2 rounded-full bg-white/90 shadow hover:scale-105 transition-transform">Save Page</button>
+      </div>
+    </header>
+
+    <section class="grid md:grid-cols-2 gap-8 items-center">
+      <!-- left / text -->
+      <div>
+        <h1 class="text-4xl md:text-6xl font-extrabold hero-gradient leading-tight">
+          Happy Birthday, <span id="heroName" class="handwritten">Her</span> 🎂
+        </h1>
+        <p id="subText" class="mt-4 text-lg text-slate-700 max-w-xl">
+          These last <span id="missMonths">6</span> months without you were heavy, but every single day you were on my mind.
+        </p>
+
+        <div class="mt-6 flex items-center gap-4">
+          <button id="hugBtn" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-lg">Send a Hug 🤗</button>
+          <button id="scrollMem" class="px-5 py-3 rounded-2xl border border-slate-200 bg-white shadow">View Memories</button>
+        </div>
+
+        <div class="mt-6 text-sm text-slate-600">
+          <span class="font-semibold">Days missed (approx):</span>
+          <span id="daysMissed" class="ml-2 font-mono">180</span>
+        </div>
+      </div>
+
+      <!-- right card with image -->
+      <div class="card rounded-3xl shadow-2xl overflow-hidden border">
+        <img id="heroImg" src="" alt="memory" class="w-full h-64 object-cover">
+        <div class="p-4">
+          <div class="font-semibold">A memory I miss</div>
+          <div class="text-sm text-slate-700 mt-1">I wish we could go back to this day and replay it forever.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Photo carousel -->
+    <section id="memories" class="mt-10">
+      <h2 class="text-xl font-semibold mb-4">Memories (last 6 months)</h2>
+      <div class="relative">
+        <div id="carousel" class="overflow-hidden rounded-2xl">
+          <div id="slides" class="carousel-slides"></div>
+        </div>
+
+        <div class="flex gap-2 mt-3">
+          <button id="prev" class="px-3 py-1 rounded-full bg-white/90 shadow">Prev</button>
+          <button id="next" class="px-3 py-1 rounded-full bg-white/90 shadow">Next</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- letter -->
+    <section class="mt-10">
+      <h3 class="text-lg font-semibold mb-4">A Letter to You</h3>
+      <article class="card rounded-3xl p-6 shadow-xl text-slate-800 leading-relaxed">
+        <p class="mb-4 reveal">Not a single day of the past <span id="revealMonths">6</span> months went by without me thinking of you.</p>
+        <p class="mb-4 reveal">I missed your laugh, the way you tilt your head when you listen, and the warmth of your hand in mine.</p>
+        <p class="mb-4 reveal">This birthday I want to make up for every missed sunrise — starting with this little surprise.</p>Mathi, these past months without you have been quiet and heavy. I know studying and family pressure has been hard. I’m sorry for any part I played in making things worse. I want to be the gentle support you need — I will wait for you until your studies are finished, patiently and proudly.</p>
+    <p>I miss our small laughs, our late-night talks, and the comfort of your voice. I’m not asking for anything now — just the chance to be near in any way you accept. When you’re ready, I’ll be here — always on your side. I love you. Finally Happy Birthday</p>
+        <div class="mt-4 text-right">
+          <div class="text-slate-600">Forever yours,</div>
+          <div id="sign" class="handwritten text-2xl text-pink-600 mt-1">Your Name</div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ending -->
+    <section class="mt-12 text-center mb-12">
+      <div class="inline-block rounded-3xl bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-6 shadow-2xl">
+        <div class="text-2xl font-extrabold">Forever & Always</div>
+        <div class="mt-2">Tap below to shower hearts</div>
+        <div class="mt-4">
+          <button id="showerBtn" class="px-6 py-3 rounded-full bg-white text-pink-600 font-semibold shadow">Tap to Feel My Love 💖</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- small overlay controls (hidden) -->
+  <div id="confettiRoot" class="pointer-events-none"></div>
+</div>
+
+<!-- YouTube iframe (visually small; autoplay may be blocked by browsers) -->
+<iframe id="ytframe" src="" width="1" height="1" style="position:fixed;left:-9999px;top:-9999px" allow="autoplay; encrypted-media" title="song"></iframe>
+
+<script>
+  /**********************
+    Initialization & UI wiring
+  **********************/
+  (function(){
+    const cfg = window.CONFIG || {};
+    const partner = cfg.partnerName || "Her Name";
+    const you = cfg.yourName || "Your Name";
+    const months = Number(cfg.missedMonths || 6);
+    const photos = cfg.photos && cfg.photos.length ? cfg.photos : [];
+    const yt = cfg.youtubeId || "";
+
+    // wire text
+    document.getElementById('hdrName').textContent = partner;
+    document.getElementById('heroName').textContent = partner;
+    document.getElementById('subText').querySelector('span')?.remove?.(); // just keep original
+    document.getElementById('subText').innerHTML = `These last <strong>${months}</strong> months without you were heavy, but every single day you were on my mind.`;
+    document.getElementById('revealMonths').textContent = months;
+    document.getElementById('sign').textContent = you;
+    document.getElementById('daysMissed').textContent = Math.round(months * 30);
+
+    // hero image
+    const heroImg = document.getElementById('heroImg');
+    if (photos[0]) heroImg.src = photos[0];
+    else heroImg.src = 'https://picsum.photos/900/600?random=1';
+
+    // carousel population
+    const slides = document.getElementById('slides');
+    function buildSlides(){
+      slides.innerHTML = '';
+      const items = photos.length ? photos : [
+        'https://picsum.photos/900/600?random=1',
+        'https://picsum.photos/900/600?random=2',
+        'https://picsum.photos/900/600?random=3'
+      ];
+      // duplicate to allow seamless scroll
+      const full = items.concat(items);
+      full.forEach((src, i) => {
+        const card = document.createElement('div');
+        card.className = 'min-w-[300px] bg-white rounded-2xl p-4 shadow-lg flex-shrink-0';
+        card.innerHTML = `<img src="${src}" alt="memory ${i+1}" class="rounded-xl w-full h-48 object-cover"/><div class="mt-3 text-sm text-slate-600 italic">I missed you here...</div>`;
+        slides.appendChild(card);
+      });
+      // set slide width via transform later
+    }
+    buildSlides();
+
+    // carousel animation (simple marquee style)
+    let cx = 0;
+    const slideWidth = () => slides.children[0] ? slides.children[0].getBoundingClientRect().width + 16 : 320;
+    function animateCarousel(){
+      cx -= 0.25; // speed
+      if (Math.abs(cx) >= slides.scrollWidth / 2) cx = 0;
+      slides.style.transform = `translateX(${cx}px)`;
+      requestAnimationFrame(animateCarousel);
+    }
+    requestAnimationFrame(animateCarousel);
+
+    // prev/next
+    document.getElementById('prev').addEventListener('click', ()=>{
+      cx += slideWidth();
+    });
+    document.getElementById('next').addEventListener('click', ()=>{
+      cx -= slideWidth();
+    });
+
+    // "View Memories" scroll
+    document.getElementById('scrollMem').addEventListener('click', ()=>{
+      document.getElementById('memories').scrollIntoView({behavior:'smooth'});
+    });
+
+    // Play song logic: opens YouTube in a small iframe; note browser autoplay policies may block sound until user interacts
+    const ytframe = document.getElementById('ytframe');
+    function setYt(){
+      if(!yt) return;
+      // Use embed with loop playlist to keep it playing; browsers may block autoplay with sound
+      ytframe.src = `https://www.youtube.com/embed/${yt}?autoplay=1&loop=1&playlist=${yt}&controls=0&rel=0`;
+    }
+    setYt();
+
+    // play button opens YouTube in new tab + focuses iframe to try autoplay
+    document.getElementById('playBtn').addEventListener('click', ()=>{
+      setYt();
+      try { window.open(`https://youtu.be/${yt}`, '_blank'); } catch {}
+      // also try to focus iframe
+      ytframe.focus();
+      alert('If audio doesn\'t start automatically, tap Play on the small YouTube tab that opened (browsers often block autoplay).');
+    });
+
+    // Save page (downloads HTML so you can keep a copy)
+    document.getElementById('downloadBtn').addEventListener('click', ()=>{
+      const blob = new Blob([document.documentElement.outerHTML], {type:'text/html'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `happy-birthday-${partner.replace(/\s+/g,'-').toLowerCase()}.html`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    });
+
+    // Confetti on load (burst)
+    const confRoot = document.getElementById('confettiRoot');
+    function burstConfetti(count=60){
+      for(let i=0;i<count;i++){
+        const el = document.createElement('div');
+        el.className = 'confetti';
+        el.style.left = (Math.random()*100)+'%';
+        el.style.top = (Math.random()*10 - 10)+'vh';
+        el.style.width = (6 + Math.random()*10)+'px';
+        el.style.height = (8 + Math.random()*14)+'px';
+        el.style.background = ['#FF6B6B','#FFD93D','#6BCB77','#4D96FF'][Math.floor(Math.random()*4)];
+        el.style.animationDuration = (1.4 + Math.random()*1.4)+'s';
+        confRoot.appendChild(el);
+        setTimeout(()=> el.remove(), 2600);
+      }
+    }
+    // initial confetti burst
+    setTimeout(()=> burstConfetti(48), 400);
+
+    // continuous floating hearts background
+    const heartsRoot = document.getElementById('hearts');
+    function spawnHeart(){
+      const h = document.createElement('div');
+      h.className = 'floating-heart';
+      const svg = `<svg viewBox="0 0 24 24" width="28" height="28" fill="none"><path d="M12 21s-6.716-4.95-9-8.01C-1.07 8.18 3.3 3 7 5.47 9.5 7.4 11.7 4.9 12 4.7c.3.2 2.5 2.7 5 0.77 3.7-2.47 8.07 3.71 4 7.5-2.28 2.06-9 8.03-9 8.03z" fill="#ff6b81"/></svg>`;
+      h.innerHTML = svg;
+      const left = Math.random()*100;
+      h.style.left = left + 'vw';
+      h.style.animationDuration = (8 + Math.random()*10) + 's';
+      heartsRoot.appendChild(h);
+      setTimeout(()=> h.remove(), 18000);
+    }
+    setInterval(spawnHeart, 700);
+
+    // Shower hearts when user clicks the big button
+    document.getElementById('showerBtn').addEventListener('click', (e)=>{
+      const rect = e.target.getBoundingClientRect();
+      const mx = rect.left + rect.width/2;
+      const my = rect.top;
+      for(let i=0;i<24;i++){
+        const d = document.createElement('div');
+        d.className = 'floating-heart';
+        d.style.left = (mx + (Math.random()*200 - 100)) + 'px';
+        d.style.bottom = '30px';
+        d.style.animationDuration = (1.2 + Math.random()*1.8)+'s';
+        d.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M12 21s-6.716-4.95-9-8.01C-1.07 8.18 3.3 3 7 5.47 9.5 7.4 11.7 4.9 12 4.7c.3.2 2.5 2.7 5 0.77 3.7-2.47 8.07 3.71 4 7.5-2.28 2.06-9 8.03-9 8.03z" fill="#ff6b81"/></svg>`;
+        document.body.appendChild(d);
+        setTimeout(()=> d.remove(), 2200);
+      }
+    });
+
+    // small effect for Send Hugs (pulse + confetti)
+    document.getElementById('hugBtn').addEventListener('click', ()=>{
+      burstConfetti(36);
+      alert('Hug sent! ❤️ (Confetti popped)');
+    });
+
+    // reveal paragraphs with small delay
+    const reveals = document.querySelectorAll('.reveal');
+    reveals.forEach((p, i) => {
+      p.style.opacity = 0;
+      p.style.transform = 'translateX(-12px)';
+      setTimeout(()=> {
+        p.style.transition = 'all 600ms cubic-bezier(.2,.9,.3,1)';
+        p.style.opacity = 1;
+        p.style.transform = 'translateX(0)';
+      }, 350 + i*250);
+    });
+
+    // download sample/pack (already wired above)
+
+    // try to autoplay on user gesture: if user clicks anywhere, set iframe src to start
+    function attemptStartMusic(){
+      if(!yt) return;
+      ytframe.src = `https://www.youtube.com/embed/${yt}?autoplay=1&loop=1&playlist=${yt}&controls=0&rel=0`;
+      window.removeEventListener('click', attemptStartMusic);
+    }
+    window.addEventListener('click', attemptStartMusic);
+  })();
+</script>
+</body>
+</html>
